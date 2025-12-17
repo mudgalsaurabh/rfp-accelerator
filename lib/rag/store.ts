@@ -30,7 +30,7 @@ export async function initializeKnowledgeBase() {
     console.log("Initializing Knowledge Base...");
 
     try {
-        const artifactsDir = path.join(process.cwd(), 'RFP Accelerator Artefacts', 'Source Information');
+        const artifactsDir = path.join(process.cwd(), 'artifacts', 'Source Information');
         const qnaDir = path.join(artifactsDir, 'Existing QnA');
         const rfpDir = path.join(artifactsDir, 'Existing RFPs');
 
