@@ -49,7 +49,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # COPY Knowledge Base - REQUIRED for initialization
-COPY --chown=nextjs:nodejs "RFP Accelerator Artefacts/" "./RFP Accelerator Artefacts/"
+COPY --chown=nextjs:nodejs ["RFP Accelerator Artefacts/", "./RFP Accelerator Artefacts/"]
 
 # COPY Service Account Key - OPTIONAL for cloud deployment
 # If missing, the app will fall back to Application Default Credentials (IAM roles)
