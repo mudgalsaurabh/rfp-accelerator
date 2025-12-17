@@ -51,14 +51,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # COPY Knowledge Base - REQUIRED for initialization
 COPY --chown=nextjs:nodejs ["RFP Accelerator Artefacts/", "./RFP Accelerator Artefacts/"]
 
-# COPY Service Account Key - OPTIONAL for cloud deployment
-# If missing, the app will fall back to Application Default Credentials (IAM roles)
-# We use a wildcard to avoid build failure if the file is missing (e.g. in Cloud Build)
-COPY --chown=nextjs:nodejs service-account-key.jso[n] ./service-account-key.json
-
-# Set environment variable for Google Auth (only effective if file exists)
-ENV GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
-
 USER nextjs
 
 EXPOSE 3000
