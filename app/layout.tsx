@@ -1,0 +1,21 @@
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "AI RFP Accelerator",
+  description: "Automate your RFP responses with AI",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className="antialiased min-h-screen">
+        {children}
+      </body>
+    </html>
+  );
+}
