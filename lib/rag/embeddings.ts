@@ -8,13 +8,14 @@ async function getVertexClient() {
     const project = 'rfp-accelerator-agent';
     const location = 'us-central1';
     const keyFile = 'service-account-key.json';
+    const keyExists = require('fs').existsSync(keyFile);
+
+    const authOptions = keyExists ? { keyFile } : {};
 
     return new VertexAI({
         project: project,
         location: location,
-        googleAuthOptions: {
-            keyFile: keyFile
-        }
+        googleAuthOptions: authOptions
     });
 }
 
@@ -23,9 +24,12 @@ export async function generateEmbedding(text: string): Promise<number[]> {
         // Fallback to REST API because SDK v1.10.0 seems to miss embedContent in standard model interface
         // or requires specific preview usage that is flaky in this env.
         const { GoogleAuth } = require('google-auth-library');
+        const keyFile = 'service-account-key.json';
+        const keyExists = require('fs').existsSync(keyFile);
+
         const auth = new GoogleAuth({
             scopes: 'https://www.googleapis.com/auth/cloud-platform',
-            keyFile: 'service-account-key.json'
+            ...(keyExists ? { keyFile } : {})
         });
         const client = await auth.getClient();
         const projectId = await auth.getProjectId();
