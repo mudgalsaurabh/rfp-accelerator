@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Copy, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Sparkles, Copy, ThumbsUp, ThumbsDown, FileDown } from 'lucide-react';
 
 interface Question {
     id: string;
@@ -15,6 +15,7 @@ interface RfpDashboardProps {
         text: string;
         results?: { question: string; answer: string; sources: string[] }[];
         questions?: string[]; // Fallback
+        docxBase64?: string;
     };
 }
 
@@ -27,6 +28,7 @@ export default function RfpDashboard({ initialData }: RfpDashboardProps) {
             sources: r.sources
         }))
     );
+    const [docxData, setDocxData] = useState<string | undefined>(initialData.docxBase64);
 
     // Fallback logic
     if (questions.length === 0 && initialData.questions) {
@@ -56,6 +58,10 @@ export default function RfpDashboard({ initialData }: RfpDashboardProps) {
                 }
                 return q;
             }));
+
+            // If we have a single answer generation, docxBase64 won't be updated here.
+            // Ideally we'd regenerate it or handle it, but for now we'll focus on the bulk processing.
+
         } catch (e) {
             console.error(e);
             alert('Failed to generate answer');
@@ -64,11 +70,32 @@ export default function RfpDashboard({ initialData }: RfpDashboardProps) {
         }
     };
 
+    const handleExport = () => {
+        if (!docxData) {
+            alert("No export data available. Try processing the file again.");
+            return;
+        }
+
+        const link = document.createElement('a');
+        link.href = `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${docxData}`;
+        link.download = 'RFP_Responses.docx';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="space-y-6 h-full overflow-y-auto pr-2 custom-scrollbar">
             <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Detected Questions ({questions.length})</h3>
-                <button className="text-primary text-sm font-medium hover:underline">Export All</button>
+                <button
+                    onClick={handleExport}
+                    disabled={!docxData}
+                    className="flex items-center gap-1.5 text-primary text-sm font-medium hover:underline disabled:text-gray-400 disabled:no-underline"
+                >
+                    <FileDown className="w-4 h-4" />
+                    Export All (.docx)
+                </button>
             </div>
 
             <div className="space-y-4">
@@ -105,7 +132,7 @@ export default function RfpDashboard({ initialData }: RfpDashboardProps) {
                                         )}
 
                                         <div className="flex items-center gap-2 mt-2">
-                                            <button className="p-1.5 hover:bg-gray-100 rounded-md transition-colors text-gray-400 hover:text-gray-600" title="Copy">
+                                            <button className="p-1.5 hover:bg-gray-100 rounded-md transition-colors text-gray-400 hover:text-gray-600" title="Copy" onClick={() => navigator.clipboard.writeText(q.answer || '')}>
                                                 <Copy className="w-3.5 h-3.5" />
                                             </button>
                                             <button className="p-1.5 hover:bg-green-50 rounded-md transition-colors text-gray-400 hover:text-green-600" title="Good">

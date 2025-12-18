@@ -4,6 +4,7 @@ import { parseDocx } from '@/lib/parsers/docx';
 import { parseExcel } from '@/lib/parsers/excel';
 import { initializeKnowledgeBase, searchSimilarDocuments } from '@/lib/rag/store';
 import { generateEmbedding, generateChatResponse } from '@/lib/rag/embeddings';
+import { generateRfpDocx } from '@/lib/utils/docx-generator';
 
 export async function POST(request: NextRequest) {
     try {
@@ -85,14 +86,24 @@ Instructions:
                 });
             } catch (err) {
                 console.error(`Error processing question "${question}":`, err);
-                results.push({ question, answer: "Error generating response." });
+                results.push({ question, answer: "Error generating response.", sources: [] });
             }
+        }
+
+        // Generate DOCX
+        let docxBase64 = '';
+        try {
+            const docxBuffer = await generateRfpDocx(results);
+            docxBase64 = docxBuffer.toString('base64');
+        } catch (docxErr) {
+            console.error('Error generating document:', docxErr);
         }
 
         return NextResponse.json({
             success: true,
             text: text.substring(0, 2000),
-            results
+            results,
+            docxBase64
         });
 
     } catch (error) {
