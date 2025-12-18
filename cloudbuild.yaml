@@ -3,7 +3,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/rfp-accelerator/rfp-accelerator:latest', '.']
   
-  # Push the container image to Artifact Registry
+  # Push the container image to Artifact Registry alos added 
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/rfp-accelerator/rfp-accelerator:latest']
 
