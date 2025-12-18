@@ -10,24 +10,29 @@ async function testChat() {
         }
     });
 
+    async function testModel(modelId) {
+        console.log(`\n--- Testing ${modelId} ---`);
+        try {
+            const model = vertexAI.getGenerativeModel({ model: modelId });
+            const result = await model.generateContent({
+                contents: [{ role: 'user', parts: [{ text: 'Hello' }] }]
+            });
+            const response = await result.response;
+            console.log(`✅ ${modelId} Success:`, response.candidates[0].content.parts[0].text);
+        } catch (error) {
+            console.log(`❌ ${modelId} Failed:`, error.message);
+        }
+    }
+
     try {
-        console.log("Getting model: gemini-1.5-flash");
-        const model = vertexAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-        console.log("Sending request: 'Hello'");
-        const result = await model.generateContent({
-            contents: [{ role: 'user', parts: [{ text: 'Hello' }] }]
-        });
-
-        const responseCallback = await result.response;
-        const text = responseCallback.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        console.log("✅ Chat Success!");
-        console.log("Response:", text);
-
-    } catch (e) {
-        console.log("❌ Chat Failed details:");
-        console.log(e.message);
+        await testModel('gemini-1.5-flash');
+        await testModel('gemini-1.5-flash-001');
+        await testModel('gemini-1.5-flash-002');
+        await testModel('gemini-1.5-pro');
+        await testModel('gemini-1.5-pro-001');
+        await testModel('gemini-1.5-pro-002');
+    } catch (globalError) {
+        console.error("Global Error:", globalError);
     }
 }
 

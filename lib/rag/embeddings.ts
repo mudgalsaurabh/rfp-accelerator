@@ -65,7 +65,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 export async function generateChatResponse(systemPrompt: string, userMessage: string): Promise<string> {
     try {
         const vertexAI = await getVertexClient();
-        const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-embedding-001' });
 
         const result = await generativeModel.generateContent({
             contents: [
