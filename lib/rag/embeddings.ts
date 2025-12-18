@@ -21,8 +21,6 @@ async function getVertexClient() {
 
 export async function generateEmbedding(text: string): Promise<number[]> {
     try {
-        // Fallback to REST API because SDK v1.10.0 seems to miss embedContent in standard model interface
-        // or requires specific preview usage that is flaky in this env.
         const { GoogleAuth } = require('google-auth-library');
         const keyFile = 'service-account-key.json';
         const keyExists = require('fs').existsSync(keyFile);
@@ -31,30 +29,36 @@ export async function generateEmbedding(text: string): Promise<number[]> {
             scopes: 'https://www.googleapis.com/auth/cloud-platform',
             ...(keyExists ? { keyFile } : {})
         });
+
         const client = await auth.getClient();
-        const projectId = await auth.getProjectId();
+        const projectId = 'rfp-accelerator-agent';
         const location = 'australia-southeast1';
-        const modelId = 'gemini-embedding-001';
+
+        // UPDATE: Use text-embedding-004 for better regional support
+        const modelId = 'text-embedding-004';
         const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:predict`;
 
         const res = await client.request({
             url,
             method: 'POST',
             data: {
-                instances: [{ content: text }]
+                instances: [{
+                    content: text,
+                    task_type: 'RETRIEVAL_DOCUMENT' // Required for this model
+                }]
             }
         });
 
         // @ts-ignore
         const embeddings = res.data?.predictions?.[0]?.embeddings?.values;
         if (!embeddings) {
-            throw new Error("Failed to generate embedding: No values returned from REST API.");
+            throw new Error("Failed to generate embedding: No values returned.");
         }
         return embeddings;
 
     } catch (error) {
         console.error("Error generating embedding:", error);
-        throw error; // This will surface invalid_grant if auth fails
+        throw error;
     }
 }
 
