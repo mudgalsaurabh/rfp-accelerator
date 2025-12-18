@@ -11,8 +11,8 @@ async function testChat() {
     });
 
     try {
-        console.log("Getting model: gemini-pro");
-        const model = vertexAI.getGenerativeModel({ model: 'gemini-pro' });
+        console.log("Getting model: gemini-1.5-flash");
+        const model = vertexAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
         console.log("Sending request: 'Hello'");
         const result = await model.generateContent({
