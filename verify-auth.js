@@ -29,7 +29,7 @@ async function verifyAuth() {
 
         // Try a simple API call to verify the project exists/is accessible (e.g., ResourceManager)
         // Or just list locations for Vertex AI
-        const location = 'us-central1';
+        const location = 'australia-southeast1';
         const baseUrl = `https://${location}-aiplatform.googleapis.com/v1`;
 
         // 1. List Locations

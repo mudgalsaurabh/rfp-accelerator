@@ -9,7 +9,7 @@ async function testRest() {
         });
         const client = await auth.getClient();
         const projectId = await auth.getProjectId();
-        const location = 'us-central1';
+        const location = 'australia-southeast1';
         const modelId = 'text-embedding-004';
 
         const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:predict`;

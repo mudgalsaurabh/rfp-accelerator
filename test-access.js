@@ -4,7 +4,7 @@ async function testAccess() {
     console.log("Initializing VertexAI...");
     const vertexAI = new VertexAI({
         project: 'rfp-accelerator-agent',
-        location: 'us-central1',
+        location: 'australia-southeast1',
         googleAuthOptions: {
             keyFile: 'service-account-key.json'
         }

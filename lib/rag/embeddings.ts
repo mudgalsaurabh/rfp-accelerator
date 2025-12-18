@@ -6,7 +6,7 @@ async function getVertexClient() {
     const { VertexAI } = require('@google-cloud/vertexai');
 
     const project = 'rfp-accelerator-agent';
-    const location = 'us-central1';
+    const location = 'australia-southeast1';
     const keyFile = 'service-account-key.json';
     const keyExists = require('fs').existsSync(keyFile);
 
@@ -33,7 +33,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
         });
         const client = await auth.getClient();
         const projectId = await auth.getProjectId();
-        const location = 'us-central1';
+        const location = 'australia-southeast1';
         const modelId = 'gemini-embedding-001';
         const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:predict`;
 

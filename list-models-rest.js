@@ -9,7 +9,7 @@ async function listModels() {
 
     const client = await auth.getClient();
     const projectId = await auth.getProjectId();
-    const location = 'us-central1';
+    const location = 'australia-southeast1';
 
     console.log(`Project ID: ${projectId}`);
     console.log(`Location: ${location}`);

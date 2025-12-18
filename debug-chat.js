@@ -4,7 +4,7 @@ async function testChat() {
     console.log("Initializing VertexAI for Chat Test...");
     const vertexAI = new VertexAI({
         project: 'rfp-accelerator-agent',
-        location: 'us-central1',
+        location: 'australia-southeast1',
         googleAuthOptions: {
             keyFile: 'service-account-key.json'
         }
