@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Copy, ThumbsUp, ThumbsDown, FileDown } from 'lucide-react';
+import { Sparkles, Copy, ThumbsUp, ThumbsDown, FileDown, CheckCircle2, Beaker, RefreshCw } from 'lucide-react';
 
 interface Question {
     id: string;
@@ -16,23 +16,30 @@ interface RfpDashboardProps {
         results?: { question: string; answer: string; sources: string[] }[];
         questions?: string[]; // Fallback
         docxBase64?: string;
-    };
+    } | null;
 }
 
 export default function RfpDashboard({ initialData }: RfpDashboardProps) {
     const [questions, setQuestions] = useState<Question[]>(
-        (initialData.results || []).map((r, i) => ({
+        (initialData?.results || []).map((r, i) => ({
             id: `q-${i}`,
             text: r.question,
             answer: r.answer,
             sources: r.sources
         }))
     );
-    const [docxData, setDocxData] = useState<string | undefined>(initialData.docxBase64);
+    const [docxData, setDocxData] = useState<string | undefined>(initialData?.docxBase64);
 
-    // Fallback logic
-    if (questions.length === 0 && initialData.questions) {
-        setQuestions(initialData.questions.map((q, i) => ({ id: `q-${i}`, text: q })));
+    // Update state when initialData changes
+    if (initialData && questions.length === 0 && (initialData.results || initialData.questions)) {
+        const newQs = (initialData.results || []).map((r, i) => ({
+            id: `q-${i}`,
+            text: r.question,
+            answer: r.answer,
+            sources: r.sources
+        }));
+        setQuestions(newQs);
+        setDocxData(initialData.docxBase64);
     }
 
     const [generating, setGenerating] = useState<string | null>(null);
@@ -85,84 +92,100 @@ export default function RfpDashboard({ initialData }: RfpDashboardProps) {
     };
 
     return (
-        <div className="space-y-6 h-full overflow-y-auto pr-2 custom-scrollbar">
-            <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Detected Questions ({questions.length})</h3>
-                <button
-                    onClick={handleExport}
-                    disabled={!docxData}
-                    className="flex items-center gap-1.5 text-primary text-sm font-medium hover:underline disabled:text-gray-400 disabled:no-underline"
-                >
-                    <FileDown className="w-4 h-4" />
-                    Export All (.docx)
-                </button>
+        <div className="bg-white rounded-[2rem] p-10 card-shadow border border-slate-50 flex flex-col h-full min-h-[550px]">
+            <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-2.5">
+                    <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                    <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Analysis Results</h2>
+                </div>
+                {questions.length > 0 && (
+                    <button
+                        onClick={handleExport}
+                        disabled={!docxData}
+                        className="flex items-center gap-2 px-4 py-2 bg-primary/5 text-primary text-sm font-bold rounded-xl hover:bg-primary/10 transition-colors disabled:opacity-50"
+                    >
+                        <FileDown className="w-4 h-4" />
+                        Export (.docx)
+                    </button>
+                )}
             </div>
 
-            <div className="space-y-4">
-                {questions.map((q) => (
-                    <div key={q.id} className="bg-gray-50 rounded-xl p-5 border border-gray-100 transition-all hover:shadow-md">
-                        <div className="flex gap-4">
-                            <div className="flex-shrink-0 mt-1">
-                                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
-                                    Q
-                                </div>
-                            </div>
-                            <div className="flex-1 space-y-3">
-                                <p className="font-medium text-gray-900 leading-snug">{q.text}</p>
-
-                                {q.answer ? (
-                                    <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm animate-in fade-in zoom-in-95 duration-200">
-                                        <div className="flex items-center gap-2 mb-2 text-primary text-xs font-semibold uppercase tracking-wide">
-                                            <Sparkles className="w-3 h-3" />
-                                            AI Suggestion
-                                        </div>
-                                        <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap mb-3">{q.answer}</p>
-
-                                        {q.sources && q.sources.length > 0 && (
-                                            <div className="mb-3 pt-3 border-t border-gray-100">
-                                                <p className="text-xs text-gray-400 font-medium mb-1">Sources</p>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {q.sources.map((s, i) => (
-                                                        <span key={i} className="px-2 py-1 bg-gray-100 text-gray-500 text-[10px] rounded-md truncate max-w-[150px]">
-                                                            {s}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className="flex items-center gap-2 mt-2">
-                                            <button className="p-1.5 hover:bg-gray-100 rounded-md transition-colors text-gray-400 hover:text-gray-600" title="Copy" onClick={() => navigator.clipboard.writeText(q.answer || '')}>
-                                                <Copy className="w-3.5 h-3.5" />
-                                            </button>
-                                            <button className="p-1.5 hover:bg-green-50 rounded-md transition-colors text-gray-400 hover:text-green-600" title="Good">
-                                                <ThumbsUp className="w-3.5 h-3.5" />
-                                            </button>
-                                            <button className="p-1.5 hover:bg-red-50 rounded-md transition-colors text-gray-400 hover:text-red-500" title="Bad">
-                                                <ThumbsDown className="w-3.5 h-3.5" />
-                                            </button>
+            <div className="flex-1 overflow-hidden">
+                {!initialData || questions.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center p-10 animate-in fade-in duration-500">
+                        <div className="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center mb-6 border border-slate-100 shadow-sm">
+                            <Beaker className="w-10 h-10 text-slate-200" />
+                        </div>
+                        <p className="text-slate-400 font-bold text-lg max-w-[200px] leading-snug">
+                            Results will appear here after analysis
+                        </p>
+                    </div>
+                ) : (
+                    <div className="h-full overflow-y-auto pr-2 custom-scrollbar space-y-4">
+                        {questions.map((q) => (
+                            <div key={q.id} className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100 transition-all hover:bg-white hover:shadow-md group">
+                                <div className="flex gap-4">
+                                    <div className="flex-shrink-0 mt-1">
+                                        <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-black text-xs">
+                                            Q
                                         </div>
                                     </div>
-                                ) : (
-                                    <button
-                                        onClick={() => generateAnswer(q.id, q.text)}
-                                        disabled={generating === q.id}
-                                        className="inline-flex items-center text-xs font-medium text-primary hover:text-primary-hover disabled:opacity-50"
-                                    >
-                                        {generating === q.id ? (
-                                            'Generating answer...'
+                                    <div className="flex-1 space-y-4">
+                                        <p className="font-bold text-slate-800 leading-snug text-[15px]">{q.text}</p>
+
+                                        {q.answer ? (
+                                            <div className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm animate-in fade-in zoom-in-95 duration-300">
+                                                <div className="flex items-center gap-2 mb-3 text-primary text-[11px] font-black uppercase tracking-[0.1em]">
+                                                    <Sparkles className="w-3.5 h-3.5" />
+                                                    AI Proposal
+                                                </div>
+                                                <p className="text-slate-600 text-[14px] leading-relaxed whitespace-pre-wrap mb-4 font-medium">{q.answer}</p>
+
+                                                {q.sources && q.sources.length > 0 && (
+                                                    <div className="mb-4 pt-4 border-t border-slate-50">
+                                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Verified Sources</p>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {q.sources.map((s, i) => (
+                                                                <span key={i} className="px-2.5 py-1 bg-slate-50 text-slate-500 text-[10px] font-bold rounded-md border border-slate-100">
+                                                                    {s}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                <div className="flex items-center gap-2">
+                                                    <button className="p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-400 hover:text-primary" title="Copy" onClick={() => navigator.clipboard.writeText(q.answer || '')}>
+                                                        <Copy className="w-4 h-4" />
+                                                    </button>
+                                                    <button className="p-2 hover:bg-emerald-50 rounded-lg transition-colors text-slate-400 hover:text-emerald-500" title="Good">
+                                                        <ThumbsUp className="w-4 h-4" />
+                                                    </button>
+                                                    <button className="p-2 hover:bg-rose-50 rounded-lg transition-colors text-slate-400 hover:text-rose-500" title="Bad">
+                                                        <ThumbsDown className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
                                         ) : (
-                                            <>
-                                                <Sparkles className="w-3 h-3 mr-1.5" />
-                                                Generate Answer
-                                            </>
+                                            <button
+                                                onClick={() => generateAnswer(q.id, q.text)}
+                                                disabled={generating === q.id}
+                                                className="inline-flex items-center text-xs font-bold text-primary hover:text-primary-hover disabled:opacity-50"
+                                            >
+                                                {generating === q.id ? (
+                                                    <RefreshCw className="w-3.5 h-3.5 mr-2 animate-spin" />
+                                                ) : (
+                                                    <Sparkles className="w-3.5 h-3.5 mr-2" />
+                                                )}
+                                                {generating === q.id ? 'Thinking...' : 'Generate AI Proposal'}
+                                            </button>
                                         )}
-                                    </button>
-                                )}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        ))}
                     </div>
-                ))}
+                )}
             </div>
         </div>
     );

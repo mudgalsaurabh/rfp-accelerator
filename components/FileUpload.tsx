@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, File, Loader2, AlertCircle } from 'lucide-react';
+import { CloudUpload, FileText, Loader2, AlertCircle, FilePlus } from 'lucide-react';
 
 interface FileUploadProps {
     onUploadComplete: (data: any) => void;
@@ -63,7 +63,6 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         setIsUploading(true);
         const formData = new FormData();
         formData.append('file', selectedFile);
-        // We could append kbUrl here if the backend supported it, for now just UI
 
         try {
             const response = await fetch('/api/rfp/process', {
@@ -77,7 +76,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
 
             const data = await response.json();
             onUploadComplete(data);
-            setSelectedFile(null); // Reset after success
+            setSelectedFile(null);
         } catch (err) {
             setError('An error occurred during upload. Please try again.');
             console.error(err);
@@ -87,74 +86,88 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
     };
 
     return (
-        <div className="flex flex-col h-full">
-            <div
-                className={`flex-1 min-h-[200px] border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 transition-all duration-200 cursor-pointer mb-6 group
-                    ${isDragging ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'}
-                    ${selectedFile ? 'bg-blue-50 border-blue-200' : ''}
-                `}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-            >
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept=".pdf,.docx,.xlsx"
-                    onChange={handleFileChange}
-                />
-
-                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    {selectedFile ? <File className="w-6 h-6 text-primary" /> : <File className="w-6 h-6 text-gray-400" />}
-                </div>
-
-                {selectedFile ? (
-                    <div className="text-center">
-                        <p className="font-semibold text-gray-900">{selectedFile.name}</p>
-                        <p className="text-xs text-gray-500 mt-1">Ready to process</p>
-                    </div>
-                ) : (
-                    <div className="text-center">
-                        <p className="font-medium text-gray-900 mb-1">Drop your file here, or click to browse</p>
-                        <p className="text-xs text-gray-400">PDF, DOCX, or TXT</p>
-                    </div>
-                )}
+        <div className="bg-white rounded-[2rem] p-10 card-shadow border border-slate-50 flex flex-col h-full min-h-[550px]">
+            <div className="flex items-center gap-2.5 mb-8">
+                <CloudUpload className="w-6 h-6 text-primary" />
+                <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Document Upload</h2>
             </div>
 
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Company Knowledge Base URL</label>
+            <div className="flex-1 flex flex-col">
+                <div
+                    className={`flex-1 min-h-[220px] border-2 border-dashed rounded-[1.5rem] flex flex-col items-center justify-center p-8 transition-all duration-300 cursor-pointer mb-8 group
+                        ${isDragging ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-primary/40 hover:bg-slate-50/50'}
+                        ${selectedFile ? 'bg-indigo-50/30 border-primary/30' : ''}
+                    `}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                >
                     <input
-                        type="text"
-                        value={kbUrl}
-                        onChange={(e) => setKbUrl(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                        type="file"
+                        file-input-id="rfp-file-input"
+                        ref={fileInputRef}
+                        className="hidden"
+                        accept=".pdf,.docx,.xlsx"
+                        onChange={handleFileChange}
                     />
+
+                    <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 border border-slate-100 group-hover:scale-110 group-hover:bg-white transition-all duration-300 shadow-sm">
+                        {selectedFile ? <FileText className="w-8 h-8 text-primary" /> : <FilePlus className="w-8 h-8 text-slate-300" />}
+                    </div>
+
+                    {selectedFile ? (
+                        <div className="text-center">
+                            <p className="font-bold text-slate-800 text-lg">{selectedFile.name}</p>
+                            <p className="text-sm text-primary font-semibold mt-2 px-3 py-1 bg-primary/10 rounded-full inline-block">Ready to process</p>
+                        </div>
+                    ) : (
+                        <div className="text-center">
+                            <p className="font-bold text-slate-700 text-lg mb-2">Drop your file here, or click to browse</p>
+                            <p className="text-sm text-slate-400 font-medium">PDF, DOCX, or XLSX</p>
+                        </div>
+                    )}
                 </div>
 
-                {error && (
-                    <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4" />
-                        {error}
+                <div className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-bold text-slate-500 mb-3 tracking-wide">Company Knowledge Base URL</label>
+                        <input
+                            type="text"
+                            input-id="kb-url-input"
+                            value={kbUrl}
+                            onChange={(e) => setKbUrl(e.target.value)}
+                            className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-white text-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium"
+                        />
                     </div>
-                )}
 
-                <button
-                    onClick={handleProcess}
-                    disabled={!selectedFile || isUploading}
-                    className="w-full btn btn-primary py-3.5 text-base font-semibold shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:shadow-none"
-                >
-                    {isUploading ? (
-                        <>
-                            <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                            Processing...
-                        </>
-                    ) : (
-                        'Process RFP'
+                    {error && (
+                        <div className="p-4 rounded-xl bg-rose-50 text-rose-600 text-sm font-semibold flex items-center gap-3 border border-rose-100">
+                            <AlertCircle className="w-5 h-5" />
+                            {error}
+                        </div>
                     )}
-                </button>
+
+                    <button
+                        button-id="process-rfp-button"
+                        onClick={handleProcess}
+                        disabled={!selectedFile || isUploading}
+                        className={`w-full py-4 text-lg font-bold shadow-xl transition-all duration-300 rounded-xl flex items-center justify-center gap-2
+                            ${!selectedFile || isUploading
+                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                                : 'bg-primary text-white hover:bg-primary-hover hover:scale-[1.01] hover:shadow-primary/20 active:scale-[0.99]'}
+                        `}
+                    >
+                        {isUploading ? (
+                            <>
+                                <Loader2 className="w-6 h-6 animate-spin" />
+                                Processing...
+                            </>
+                        ) : (
+                            'Process RFP'
+                        )}
+                    </button>
+                </div>
             </div>
         </div>
     );
