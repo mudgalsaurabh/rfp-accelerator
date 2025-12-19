@@ -90,10 +90,10 @@ Instructions:
             }
         }
 
-        // Generate DOCX
+        // Generate DOCX with full document text (Injection Mode)
         let docxBase64 = '';
         try {
-            const docxBuffer = await generateRfpDocx(results);
+            const docxBuffer = await generateRfpDocx(results, text);
             docxBase64 = docxBuffer.toString('base64');
         } catch (docxErr) {
             console.error('Error generating document:', docxErr);
